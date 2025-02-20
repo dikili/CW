@@ -9,7 +9,11 @@ import {
     MenuItem,
 } from '@mui/material';
 
-export default function NavBar() {
+type Props = {
+    openForm: () => void;
+};
+
+export default function NavBar({openForm}: Props) {
     return (
         <Box sx={{flexGrow: 1}}>
             <AppBar
@@ -63,6 +67,7 @@ export default function NavBar() {
                                 size='large'
                                 variant='contained'
                                 color='warning'
+                                onClick={openForm}
                             >
                                 Create Activities
                             </Button>
