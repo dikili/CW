@@ -1,24 +1,25 @@
-import {Box, Container, CssBaseline} from '@mui/material';
-import axios from 'axios';
-import {useEffect, useState} from 'react';
+import {Box, Container, CssBaseline, Typography} from '@mui/material';
+import {useState} from 'react';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
+import {useActivities} from '../../lib/hooks/useActivities';
 
 function App() {
-    const [activities, setActivities] = useState<Activity[]>([]);
+    // RQ  const [activities, setActivities] = useState<Activity[]>([]);
     const [selectedActivity, setSelectedActivity] = useState<
         Activity | undefined
     >(undefined);
     const [editMode, setEditMode] = useState(false);
+    const {activities, isPending, updateActivity} = useActivities();
 
-    useEffect(() => {
-        axios
-            .get<Activity[]>('https://localhost:5001/api/activities')
-            .then((response) => setActivities(response.data));
-    }, []);
+    // RQ useEffect(() => {
+    //     axios
+    //         .get<Activity[]>('https://localhost:5001/api/activities')
+    //         .then((response) => setActivities(response.data));
+    // }, []);
 
     const handleSelectActivity = (id: string) => {
-        setSelectedActivity(activities.find((x) => x.id === id));
+        setSelectedActivity(activities!.find((x) => x.id === id));
     };
 
     const handleCancelSelectActivity = () => {
@@ -33,42 +34,28 @@ function App() {
 
     const handleCloseForm = () => {
         setEditMode(false);
-    };
-
-    const handleSubmitForm = (activity: Activity) => {
-        setEditMode(false);
-        if (activity.id) {
-            setActivities(
-                activities.map((x) => (x.id === activity.id ? activity : x)),
-            );
-            setSelectedActivity(undefined);
-        } else {
-            const newActivity = {...activity, id: activities.length.toString()};
-            setSelectedActivity(newActivity);
-            setActivities([...activities, newActivity]);
-        }
-    };
-
-    const handleDeleteActivity = (id: string) => {
-        setActivities(activities.filter((x) => x.id !== id));
+        console.log(updateActivity);
     };
 
     return (
-        <Box sx={{bgColor: '#eeeeee'}}>
+        <Box sx={{bgColor: '#eeeeee', minHeight: '100vh'}}>
             <CssBaseline />
             <NavBar openForm={handleOpenForm} />
             <Container maxWidth='xl' sx={{mt: 3}}>
-                <ActivityDashboard
-                    activities={activities}
-                    selectActivity={handleSelectActivity}
-                    cancelSelectActivity={handleCancelSelectActivity}
-                    selectedActivity={selectedActivity}
-                    openForm={handleOpenForm}
-                    closeForm={handleCloseForm}
-                    editMode={editMode}
-                    submitForm={handleSubmitForm}
-                    deleteActivity={handleDeleteActivity}
-                />
+                {!activities || isPending ? (
+                    <Typography>Loading...</Typography>
+                ) : (
+                    <ActivityDashboard
+                        activities={activities}
+                        selectActivity={handleSelectActivity}
+                        cancelSelectActivity={handleCancelSelectActivity}
+                        selectedActivity={selectedActivity}
+                        openForm={handleOpenForm}
+                        closeForm={handleCloseForm}
+                        editMode={editMode}
+                        // submitForm={handleSubmitForm}
+                    />
+                )}
             </Container>
         </Box>
     );

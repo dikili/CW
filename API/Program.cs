@@ -16,11 +16,23 @@ builder.Services.AddControllers();
 builder.Services.AddCors();
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<GetActivityList.Handler>());
 builder.Services.AddAutoMapper(typeof(MapperProfiles).Assembly);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+                      });
+});
+
+
 
 var app = builder.Build();
 
-app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000", "https://localhost:3000"));
-
+//app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000", "https://localhost:3000","http://localhost:5001", "https://localhost:5001"));
+app.UseCors(MyAllowSpecificOrigins);
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();
